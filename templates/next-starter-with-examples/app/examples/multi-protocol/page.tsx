@@ -8,6 +8,7 @@ import {
   getPreviousFrame,
 } from "frames.js/next/server";
 import { getXmtpFrameMessage, isXmtpFrameActionPayload } from "frames.js/xmtp";
+import { getLensFrameMessage, isLensFrameActionPayload } from "frames.js/lens";
 import { currentURL } from "../../utils";
 import { DEFAULT_DEBUGGER_HUB_URL, createDebugUrl } from "../../debug";
 import Link from "next/link";
@@ -21,6 +22,10 @@ const acceptedProtocols: ClientProtocolId[] = [
     id: "farcaster",
     version: "vNext",
   },
+  {
+    id: "lens",
+    version: "1.0.0",
+  },
 ];
 
 // This is a react server component only
@@ -30,8 +35,18 @@ export default async function Home({ searchParams }: NextServerPageProps) {
 
   let fid: number | undefined;
   let walletAddress: string | undefined;
+  let lensProfileId: string | undefined;
 
   if (
+    previousFrame.postBody &&
+    isLensFrameActionPayload(previousFrame.postBody)
+  ) {
+    const frameMessage = await getLensFrameMessage(previousFrame.postBody);
+    if (frameMessage?.isProfileIdVerified) {
+      lensProfileId = frameMessage?.profileId;
+    }
+    walletAddress = frameMessage?.verifiedWalletAddress;
+  } else if (
     previousFrame.postBody &&
     isXmtpFrameActionPayload(previousFrame.postBody)
   ) {
@@ -70,6 +85,9 @@ export default async function Home({ searchParams }: NextServerPageProps) {
               This frame gets the interactor&apos;s wallet address or FID
               depending on the client protocol.
             </div>
+            {lensProfileId && (
+              <div tw="flex">Lens Profile ID: {lensProfileId}</div>
+            )}
             {fid && <div tw="flex">FID: {fid}</div>}
             {walletAddress && (
               <div tw="flex">Wallet Address: {walletAddress}</div>
