@@ -42,10 +42,9 @@ export default async function Home({ searchParams }: NextServerPageProps) {
     isLensFrameActionPayload(previousFrame.postBody)
   ) {
     const frameMessage = await getLensFrameMessage(previousFrame.postBody);
-    if (frameMessage?.isProfileIdVerified) {
-      lensProfileId = frameMessage?.profileId;
+    if (frameMessage?.isActionVerifed) {
+      lensProfileId = frameMessage.untrustedData.profileId;
     }
-    walletAddress = frameMessage?.verifiedWalletAddress;
   } else if (
     previousFrame.postBody &&
     isXmtpFrameActionPayload(previousFrame.postBody)
@@ -55,6 +54,7 @@ export default async function Home({ searchParams }: NextServerPageProps) {
   } else {
     const frameMessage = await getFrameMessage(previousFrame.postBody, {
       hubHttpUrl: DEFAULT_DEBUGGER_HUB_URL,
+      fetchHubContect: true,
     });
 
     if (frameMessage && frameMessage?.isValid) {
