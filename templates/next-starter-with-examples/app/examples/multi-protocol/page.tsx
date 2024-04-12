@@ -42,8 +42,8 @@ export default async function Home({ searchParams }: NextServerPageProps) {
     isLensFrameActionPayload(previousFrame.postBody)
   ) {
     const frameMessage = await getLensFrameMessage(previousFrame.postBody);
-    if (frameMessage?.isActionVerifed) {
-      lensProfileId = frameMessage.untrustedData.profileId;
+    if (frameMessage?.isValid) {
+      lensProfileId = frameMessage.profileId;
     }
   } else if (
     previousFrame.postBody &&
